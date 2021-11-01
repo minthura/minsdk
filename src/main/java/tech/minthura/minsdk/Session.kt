@@ -1,5 +1,7 @@
 package tech.minthura.minsdk
 
+import io.reactivex.rxjava3.annotations.NonNull
+import io.reactivex.rxjava3.disposables.Disposable
 import tech.minthura.minsdk.models.Error
 import tech.minthura.minsdk.models.Mock
 
@@ -11,7 +13,7 @@ class Session(private val minSDK: MinSDK) {
         }
     }
 
-    fun getMock(onSuccess: (Mock) -> Unit, onError : (error : Error) -> Unit){
-        minSDK.getMock(onSuccess, onError)
+    fun getMock(onSuccess: (Mock) -> Unit, onError : (error : Error) -> Unit): @NonNull Disposable {
+        return minSDK.getMock(onSuccess, onError)
     }
 }

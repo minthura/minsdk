@@ -1,5 +1,7 @@
 package tech.minthura.minsdk
 
+import io.reactivex.rxjava3.annotations.NonNull
+import io.reactivex.rxjava3.disposables.Disposable
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -12,6 +14,7 @@ import tech.minthura.minsdk.services.MockService
 class MinSDK(baseUrl: String) {
     private val retrofitApi : RetrofitApi
     private val mockService: MockService
+
     init {
         val interceptor = HttpLoggingInterceptor()
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC)
@@ -26,7 +29,7 @@ class MinSDK(baseUrl: String) {
         mockService = MockService(retrofitApi)
     }
 
-    fun getMock(onSuccess: (Mock) -> Unit, onError : (error : Error) -> Unit){
-        mockService.getMock(onSuccess, onError)
+    fun getMock(onSuccess: (Mock) -> Unit, onError : (error : Error) -> Unit) : @NonNull Disposable {
+        return mockService.getMock(onSuccess, onError)
     }
 }

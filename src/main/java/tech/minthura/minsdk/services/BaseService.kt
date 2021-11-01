@@ -5,7 +5,9 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.annotations.NonNull
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import retrofit2.HttpException
 import tech.minthura.minsdk.models.Error
@@ -30,12 +32,15 @@ open class BaseService {
         }
     }
 
-    open fun <T : Any>handleResponse(observable : Observable<T>, onSuccess : (t : T) -> Unit, onError : (error : Error) -> Unit){
-        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe ({
-            onSuccess(it)
-        }, {
-            handleApiError(it, onError)
-        })
+    open fun <T : Any>handleResponse(observable : Observable<T>, onSuccess : (t : T) -> Unit, onError : (error : Error) -> Unit): @NonNull Disposable {
+        return observable.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                onSuccess(it)
+            }, {
+                handleApiError(it, onError)
+            })
+
     }
 
     private fun buildErrorResponse(json : String) : ErrorResponse? {
