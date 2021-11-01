@@ -1,0 +1,2 @@
+# minsdk
+Standard RestAPI SDK
