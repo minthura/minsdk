@@ -2,6 +2,7 @@ package tech.minthura.minsdk.services
 
 import android.util.Log
 import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -13,6 +14,7 @@ import retrofit2.HttpException
 import tech.minthura.minsdk.models.Error
 import tech.minthura.minsdk.models.ErrorResponse
 import tech.minthura.minsdk.models.Errors
+import java.io.IOException
 import javax.net.ssl.HttpsURLConnection
 
 const val TAG = "MinSDK"
@@ -29,6 +31,14 @@ open class BaseService {
                 HttpsURLConnection.HTTP_BAD_REQUEST -> onError(Error(Errors.BAD_REQUEST, getErrorResponse(error)))
                 else -> onError(Error(Errors.UNKNOWN, getErrorResponse(error)))
             }
+        }else {
+            error.printStackTrace()
+            if (error.message != null){
+                onError(Error(Errors.UNKNOWN, ErrorResponse(error.message!!, 500)))
+            } else {
+                onError(Error(Errors.UNKNOWN, ErrorResponse("Unknown error", 500)))
+            }
+
         }
     }
 
@@ -48,7 +58,13 @@ open class BaseService {
         val jsonAdapter: JsonAdapter<ErrorResponse> = moshi.adapter(
             ErrorResponse::class.java
         )
-        return jsonAdapter.fromJson(json)
+        return try {
+            jsonAdapter.fromJson(json)
+        } catch (e : JsonDataException) {
+            ErrorResponse("JsonDataException", 500)
+        } catch (e : IOException) {
+            ErrorResponse("IOException", 500)
+        }
     }
 
     private fun getErrorResponse(error : HttpException) : ErrorResponse? {
